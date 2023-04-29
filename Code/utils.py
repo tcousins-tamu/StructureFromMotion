@@ -144,12 +144,14 @@ def DrawCorrespondences(img, ptsTrue, ptsReproj, ax, drawOnly=50):
     ax: matplotlib axis object
     """
     ax.imshow(img)
-
+    draw = drawOnly
+    if drawOnly > ptsTrue.shape[0]:
+        draw = ptsTrue.shape[0]
     randidx = np.random.choice(
-        ptsTrue.shape[0], size=(drawOnly,), replace=False)
+        ptsTrue.shape[0], size=(draw,), replace=False)
     ptsTrue_, ptsReproj_ = ptsTrue[randidx], ptsReproj[randidx]
 
-    colors = colors = np.random.rand(drawOnly, 3)
+    colors = colors = np.random.rand(draw, 3)
 
     ax.scatter(ptsTrue_[:, 0], ptsTrue_[:, 1], marker='x',
                c='r', linewidths=.1, label='Ground Truths')

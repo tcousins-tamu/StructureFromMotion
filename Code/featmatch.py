@@ -36,7 +36,7 @@ def FeatMatch(opts, data_files=[]):
         if opts.features == "ORB":
             feat = getattr(cv2, '{}_create'.format(opts.features))()
         else:
-            feat = getattr(cv2.xfeatures2d,
+            feat = getattr(cv2,
                            '{}_create'.format(opts.features))()
         kp, desc = feat.detectAndCompute(img, None)
         data.append((img_name, kp, desc))

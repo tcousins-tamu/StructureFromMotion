@@ -40,6 +40,7 @@ class SFM(object):
             opts.out_dir, opts.dataset, 'point-clouds')
         self.out_err_dir = os.path.join(opts.out_dir, opts.dataset, 'errors')
 
+        self.latest_ptcld = None
         # output directories
         if not os.path.exists(self.out_cloud_dir):
             os.makedirs(self.out_cloud_dir)
@@ -104,8 +105,8 @@ class SFM(object):
         img1pts, img2pts, img1idx, img2idx = self._GetAlignedMatches(kp1, desc1, kp2,
                                                                      desc2, matches)
 
-        F, mask = cv2.findFundamentalMat(img1pts, img2pts, method=opts.fund_method,
-                                         ransacReprojThreshold=opts.outlier_thres, confidence=opts.fund_prob)
+        F, mask = cv2.findFundamentalMat(img1pts, img2pts, method=self.opts.fund_method,
+                                         ransacReprojThreshold=self.opts.outlier_thres, confidence=self.opts.fund_prob)
 
         # F, mask = cv2.findFundamentalMat(img1pts, img2pts, method=opts.fund_method,
         #                                  param1=opts.outlier_thres, param2=opts.fund_prob)
@@ -184,9 +185,9 @@ class SFM(object):
                     img1pts, img2pts, img1idx, img2idx = self._GetAlignedMatches(kp1, desc1, kp2,
                                                                                  desc2, matches)
 
-                    F, mask = cv2.findFundamentalMat(img1pts, img2pts, method=opts.fund_method,
-                                                     ransacReprojThreshold=opts.outlier_thres,
-                                                     confidence=opts.fund_prob)
+                    F, mask = cv2.findFundamentalMat(img1pts, img2pts, method=self.opts.fund_method,
+                                                     ransacReprojThreshold=self.opts.outlier_thres,
+                                                     confidence=self.opts.fund_prob)
                     # F, mask = cv2.findFundamentalMat(img1pts, img2pts, method=opts.fund_method,
                     #                                  param1=opts.outlier_thres,
                     #                                  param2=opts.fund_prob)
@@ -203,7 +204,7 @@ class SFM(object):
 
         def _Find2D3DMatches():
 
-            matcher_temp = getattr(cv2, opts.matcher)()
+            matcher_temp = getattr(cv2, self.opts.matcher)()
             kps, descs = [], []
             for n in self.image_names:
                 if n in self.image_data.keys():
@@ -290,6 +291,7 @@ class SFM(object):
 
         colors = _GetColors()
         pts2ply(self.point_cloud, colors, filename)
+        self.latest_ptcld = filename
 
     def _ComputeReprojectionError(self, name):
 
@@ -305,6 +307,9 @@ class SFM(object):
         kp, desc = self._LoadFeatures(name)
         img_pts = np.array([kp_.pt for i, kp_ in enumerate(kp) if ref[i] > 0])
 
+        #TODO -
+        #Removing points with a high reprojection error
+        
         err = np.mean(np.sqrt(np.sum((img_pts-reproj_pts)**2, axis=-1)))
 
         if self.opts.plot_error:
