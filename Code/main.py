@@ -4,6 +4,7 @@ import argparse
 from featmatch import *
 import open3d as o3d
 
+
 def SetArguments(parser):
 
     # Arguments for SFM
@@ -26,6 +27,8 @@ def SetArguments(parser):
                         help='[True|False] Whether to cross check feature matching or not \
                         (default: True)')
 
+    parser.add_argument("--reproj_err_thresh", action="store", type=float, default=15.0,
+                        dest="reproj_err_thresh", help="Reprojection error threshold for removing points")
     # epipolar geometry parameters
     parser.add_argument('--calibration_mat', action='store', type=str, default='benchmark',
                         dest='calibration_mat', help='[benchmark|lg_g3] type of intrinsic camera \
@@ -76,9 +79,11 @@ def SetArguments(parser):
                         dest='save_results', help='[True|False] whether to save images with\
                         keypoints drawn on them (default: False)')
 
+
 def PostprocessArgs(opts):
     opts.fund_method = getattr(cv2, opts.fund_method)
     opts.ext = opts.ext.split(',')
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -86,11 +91,12 @@ if __name__ == '__main__':
     opts = parser.parse_args()
     PostprocessArgs(opts)
 
+    # For testing, I can skip feature matching for the time being. It was generated in te first pass.
     ftm = FeatMatch(opts, opts.data_files)
     sfm = SFM(opts)
     sfm.Run()
 
-    #Viewing the .ply file
+    # Cleaning the resulting ply file and removing outliers
     pcd = o3d.io.read_point_cloud(sfm.latest_ptcld)
-    pcd, _= pcd.remove_statistical_outlier(nb_neighbors = 5, std_ratio = .5)
+    pcd, _ = pcd.remove_statistical_outlier(nb_neighbors=5, std_ratio=.5)
     o3d.visualization.draw_geometries([pcd])

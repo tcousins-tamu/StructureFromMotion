@@ -41,6 +41,7 @@ class SFM(object):
         self.out_err_dir = os.path.join(opts.out_dir, opts.dataset, 'errors')
 
         self.latest_ptcld = None
+        self.reprojErrThresh = opts.reproj_err_thresh
         # output directories
         if not os.path.exists(self.out_cloud_dir):
             os.makedirs(self.out_cloud_dir)
@@ -72,7 +73,13 @@ class SFM(object):
         with open(os.path.join(self.feat_dir, 'desc_{}.pkl'.format(name)), 'rb') as f:
             desc = pickle.load(f)
 
+        # Removing features withe a high reprojection error
+
         return kp, desc
+
+    # def _RemoveHighErrorPts(self, )
+
+    # NOTE: I might have to remove the bad points from the bad matches as well. Wait, shouldnt this just be in the feature matching?
 
     def _LoadMatches(self, name1, name2):
         with open(os.path.join(self.matches_dir, 'match_{}_{}.pkl'.format(name1, name2)), 'rb') as f:
@@ -270,27 +277,73 @@ class SFM(object):
         R, _ = cv2.Rodrigues(R)
         self.image_data[name] = [R, t, np.ones((ref_len,))*-1]
 
+    # def ToPly(self, filename):
+
+    #     def _GetColors():
+    #         colors = np.zeros_like(self.point_cloud)
+
+    #         for k in self.image_data.keys():
+    #             _, _, ref = self.image_data[k]
+    #             kp, desc = self._LoadFeatures(k)
+    #             kp = np.array(kp)[ref >= 0]
+    #             image_pts = np.array([_kp.pt for _kp in kp])
+
+    #             image = cv2.imread(os.path.join(
+    #                 self.images_dir, k+'.jpg'))[:, :, ::-1]
+
+    #             colors[ref[ref >= 0].astype(int)] = image[image_pts[:, 1].astype(int),
+    #                                                       image_pts[:, 0].astype(int)]
+
+    #         return colors
+
+    #     colors = _GetColors()
+    #     pts2ply(self.point_cloud, colors, filename)
+    #     self.latest_ptcld = filename
+
     def ToPly(self, filename):
+        """This is essentially a combination of the reprojection error function and the points to ply function. 
+        This will only save points that have an error below the threshold.
 
-        def _GetColors():
+        Args:
+            filename (_type_): _description_
+            reprojErrThresh (int, optional): _description_. Defaults to 15.
+        """
+
+        def _ComputeReprojections(X, R, t, K):
+            outh = K.dot(R.dot(X.T) + t)
+            out = cv2.convertPointsFromHomogeneous(outh.T)[:, 0, :]
+            return out
+
+        def _GetColorsRemPts():
             colors = np.zeros_like(self.point_cloud)
-
+            pts_rem = 0
+            points = []
             for k in self.image_data.keys():
-                _, _, ref = self.image_data[k]
+                R, t, ref = self.image_data[k]
                 kp, desc = self._LoadFeatures(k)
-                kp = np.array(kp)[ref >= 0]
-                image_pts = np.array([_kp.pt for _kp in kp])
 
+                reproj_pts = _ComputeReprojections(
+                    self.point_cloud[ref[ref > 0].astype(int)], R, t, self.K)
+                img_pts = np.array(
+                    [kp_.pt for i, kp_ in enumerate(kp) if ref[i] > 0])
+
+                idx = np.where(
+                    np.sqrt(np.sum((img_pts-reproj_pts)**2, axis=-1)) < self.reprojErrThresh)
+                pts_rem += len(img_pts) - len(idx[0])
+                kp = np.array(kp)[ref > 0][idx]
+                image_pts = np.array([_kp.pt for _kp in kp])
                 image = cv2.imread(os.path.join(
                     self.images_dir, k+'.jpg'))[:, :, ::-1]
 
-                colors[ref[ref >= 0].astype(int)] = image[image_pts[:, 1].astype(int),
-                                                          image_pts[:, 0].astype(int)]
+                if (len(ref[ref > 0]) < 1) or (image_pts.shape[0] < 1):
+                    continue
+                colors[ref[ref > 0][idx].astype(int)] = image[image_pts[:, 1].astype(int),
+                                                              image_pts[:, 0].astype(int)]
+                points.extend(self.point_cloud[ref[ref > 0][idx].astype(int)])
+            return colors, np.asarray(points)
 
-            return colors
-
-        colors = _GetColors()
-        pts2ply(self.point_cloud, colors, filename)
+        colors, pts = _GetColorsRemPts()
+        pts2ply(pts, colors, filename)
         self.latest_ptcld = filename
 
     def _ComputeReprojectionError(self, name):
@@ -307,9 +360,6 @@ class SFM(object):
         kp, desc = self._LoadFeatures(name)
         img_pts = np.array([kp_.pt for i, kp_ in enumerate(kp) if ref[i] > 0])
 
-        #TODO -
-        #Removing points with a high reprojection error
-        
         err = np.mean(np.sqrt(np.sum((img_pts-reproj_pts)**2, axis=-1)))
 
         if self.opts.plot_error:

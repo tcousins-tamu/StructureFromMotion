@@ -39,6 +39,7 @@ def FeatMatch(opts, data_files=[]):
             feat = getattr(cv2,
                            '{}_create'.format(opts.features))()
         kp, desc = feat.detectAndCompute(img, None)
+
         data.append((img_name, kp, desc))
 
         kp_ = SerializeKeypoints(kp)
