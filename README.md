@@ -14,12 +14,11 @@ It should be noted that, if you do NOT have access to SIFT or SURF, ORB is a goo
 
 #TEST CASES####
 #GOOD
-python SfM2STL.py --features SIFT
+python main.py --features SIFT
 python main.py --features SIFT --dataset Herz-Jesus-P25 --data_dirFt ../data/Herz-Jesus-P25/images/ --out_dirFt ../data/Herz-Jesus-P25 --reproj_err_thresh 5
 python main.py --features SIFT --dataset castle-P19 --data_dirFt ../data/castle-P19/images/ --out_dirFt ../data/castle-P19 --reproj_err_thresh 5
+python main.py --features SIFT --dataset Herz-Jesus-P8 --data_dirFt ../data/Herz-Jesus-P8/images/ --out_dirFt ../data/Herz-Jesus-P8 --reproj_err_thresh 5 #This one is OKAY, not great
 
 #Terrible Example(s), doesnt work well with ORB either. After zooming in some, these arent bad, just need post processing.
-python SfM2STL.py --features SIFT --dataset castle-P30 --data_dirFt ../data/castle-P30/images/ --out_dirFt ../data/castle-P30 --reproj_err_thresh 1
-python SfM2STL.py --features SIFT --dataset Herz-Jesus-P25 --data_dirFt ../data/Herz-Jesus-P25/images/ --out_dirFt ../data/Herz-Jesus-P25
-python SfM2STL.py --features SIFT --dataset Herz-Jesus-P8 --data_dirFt ../data/Herz-Jesus-P8/images/ --out_dirFt ../data/Herz-Jesus-P8
-python SfM2STL.py --features SIFT --dataset entry-P10 --data_dirFt ../data/entry-P10/images/ --out_dirFt ../data/entry-P10
+python main.py --features SIFT --dataset castle-P30 --data_dirFt ../data/castle-P30/images/ --out_dirFt ../data/castle-P30 --reproj_err_thresh 1
+python main.py --features SIFT --dataset entry-P10 --data_dirFt ../data/entry-P10/images/ --out_dirFt ../data/entry-P10 --reproj_err_thresh 5
