@@ -62,6 +62,12 @@ class SFM(object):
         elif opts.calibration_mat == 'lg_g3':
             self.K = np.array(
                 [[3.97*320, 0, 320], [0, 3.97*320, 240], [0, 0, 1]])
+        elif opts.calibration_mat == 'galaxy_a30':
+            self.K = np.array(
+                [[1707.207294209364334, 0, 960], [0, 1281.477666, 540], [0, 0, 1]])
+        elif opts.calibration_mat == 'galaxy_a30_crop':
+            self.K = np.array(
+                [[2667.5114, 0, 1500], [0, 3559.6602, 1500], [0, 0, 1]])
         else:
             raise NotImplementedError
 
