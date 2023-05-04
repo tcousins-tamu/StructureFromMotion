@@ -68,6 +68,9 @@ class SFM(object):
         elif opts.calibration_mat == 'galaxy_a30_crop':
             self.K = np.array(
                 [[2667.5114, 0, 1500], [0, 3559.6602, 1500], [0, 0, 1]])
+        elif opts.calibration_mat == 'virtual_cam':
+            self.K = np.array(
+                [[1020.665, 0, 720], [0, 1499.9077, 540], [0, 0, 1]])
         else:
             raise NotImplementedError
 
