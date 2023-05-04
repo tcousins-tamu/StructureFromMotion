@@ -24,9 +24,13 @@ It should be noted that, if you do NOT have access to SIFT or SURF, ORB is a goo
 >python main.py --features SIFT --dataset Herz-Jesus-P8 --data_dirFt ../data/Herz-Jesus-P8/images/ --out_dirFt ../data/Herz-Jesus-P8 --reproj_err_thresh 5 
 #This one is OKAY, not great
 
->python main.py --features SIFT --dataset Herz-Jesus-P25 --data_dirFt ../Data/mevlana/images/ --out_dirFt ../Data/mevlana --reproj_err_thresh 5 --calibration_mat galaxy_a30_crop
+>python main.py --features SIFT --dataset mevlana --data_dirFt ../Data/mevlana/images/ --out_dirFt ../Data/mevlana --reproj_err_thresh 5 --calibration_mat galaxy_a30_crop
 
->python main.py --features SIFT --dataset Herz-Jesus-P25 --data_dirFt ../Data/mevlana/images/ --out_dirFt ../Data/mevlana --reproj_err_thresh 5 --calibration_mat galaxy_a30
+>python main.py --features SIFT --dataset mevlana --data_dirFt ../Data/mevlana/images/ --out_dirFt ../Data/mevlana --reproj_err_thresh 5 --calibration_mat galaxy_a30
+
+For virtual camera and synthetic dataset:
+
+>python main.py --features SIFT --dataset synth --data_dirFt ../Data/synth/images/ --out_dirFt ../Data/synth --calibration_mat virtual_cam
 
 ### Terrible Example(s)
 Doesnt work well with ORB either. After zooming in some, these arent bad, just need post processing.
