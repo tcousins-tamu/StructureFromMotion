@@ -5,6 +5,7 @@ import pickle
 import os
 from time import time
 import matplotlib.pyplot as plt
+import open3d as o3d
 
 from utils import *
 import pdb
@@ -450,6 +451,38 @@ class SFM(object):
         print('Reconstruction Completed: Mean Reprojection Error = {2} [t={0:.6}s], \
                 Results stored in {1}'.format(total_time, self.opts.out_dir, mean_error))
 
+
+def ConvertToMesh(pcd, method="ball pivoting"):
+        #Remove Outliers based on Neighbours
+        cl, ind = pcd.remove_radius_outlier(nb_points=4, radius=0.1)
+        pcd = cl.select_by_index(ind)
+
+        #Remove Statistical Outliers
+        pcd, _ = pcd.remove_statistical_outlier(nb_neighbors=5, std_ratio=.5)
+            
+        #Estimate Normals
+        pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.1, max_nn=30))
+
+        #Orient Normals
+        pcd.orient_normals_consistent_tangent_plane(100)
+
+        if(method=="ball pivoting"):
+
+            #Compute average distance amongs point cloud to estimate r
+            distances = pcd.compute_nearest_neighbor_distance()
+            avg_dist = np.mean(distances)
+            radius = 20 * avg_dist
+
+            rec_mesh = o3d.geometry.TriangleMesh.create_from_point_cloud_ball_pivoting(pcd,o3d.utility.DoubleVector([radius, radius * 2]))
+            return [rec_mesh]
+
+        elif(method=="poisson"):
+            mesh, densities = o3d.geometry.TriangleMesh.create_from_point_cloud_poisson(pcd, depth=8)
+            return [mesh]
+            
+        else:
+            print("Invalid Method for Mesh Conversion passed")
+            return 
 
 def SetArguments(parser):
 
