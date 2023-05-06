@@ -1,3 +1,4 @@
+## About
 This work is heavily influenced by a repository located here:
 https://github.com/muneebaadil/how-to-sfm
 
@@ -7,11 +8,17 @@ The repo above comes with a solid tutorial that introduces you to the flow requi
 
 It should be noted that, if you do NOT have access to SIFT or SURF, ORB is a good alternative.
 
-# TODO
+## Converting Point Cloud output to Mesh
+The function responsible for conversion is ConvertToMesh(). It isn't being called right now since it produces an undesirable output. It takes in as input pcd (the generated point cloud) and the method to be used for conversion - "ball pivoting" or "poisson". The function returns a mesh which can be visualized using o3d.visualization.draw_geometries().
+
+<!---
+## TODO
 
 1. THERE ARE A TON OF POORLY CALCULATED POINTS THAT NEED TO BE CLEANED.
 2. CONVERTING THE POINT CLOUDS TO STL. THIS SHOULDNT BE TOO HARD AFTER CLEANING. MIGHT HAVE TO ASSUME AN ARBITRARY DEPTH.
 3. CALCULATING THE K VALUES FOR TOLGA'S VIDEOS
+
+-->
 
 ## TEST CASES
 ### GOOD
